@@ -67,6 +67,13 @@
 			<comments>A business-friendly OSS license</comments>
 		</license>
 	</licenses>
+	<repositories>
+		<repository>
+			<id>jalia-repo</id>
+			<name>Jalia Repository</name>
+			<url>http://repo.danysoft.org.s3.amazonaws.com/</url>
+		</repository>
+	</repositories>
 	<distributionManagement>
 		<site>
 			<id>repo.danysoft.org</id>
