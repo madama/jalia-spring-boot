@@ -71,7 +71,7 @@
 		<repository>
 			<id>jalia-repo</id>
 			<name>Jalia Repository</name>
-			<url>http://repo.danysoft.org.s3.amazonaws.com/</url>
+			<url>http://repo.danysoft.org.s3.amazonaws.com/release/</url>
 		</repository>
 	</repositories>
 	<distributionManagement>
