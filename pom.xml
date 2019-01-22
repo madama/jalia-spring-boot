@@ -5,7 +5,7 @@
 	<artifactId>jalia-spring-boot</artifactId>
 	<version>0.5.0</version>
 	<packaging>jar</packaging>
-	<url>https://github.com/madama/jalia</url>
+	<url>https://github.com/madama/jalia-spring-boot</url>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -59,4 +59,26 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+			<comments>A business-friendly OSS license</comments>
+		</license>
+	</licenses>
+	<distributionManagement>
+		<site>
+			<id>repo.danysoft.org</id>
+			<url>s3://repo.danysoft.org/sites/jalia-spring-boot</url>
+		</site>
+		<snapshotRepository>
+			<id>repo.danysoft.org</id>
+			<url>s3://repo.danysoft.org/snapshot</url>
+		</snapshotRepository>
+		<repository>
+			<id>repo.danysoft.org</id>
+			<url>s3://repo.danysoft.org/release</url>
+		</repository>
+	</distributionManagement>
 </project>
