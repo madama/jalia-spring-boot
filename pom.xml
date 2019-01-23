@@ -59,6 +59,15 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+	<build>
+		<extensions>
+			<extension>
+				<groupId>org.kuali.maven.wagons</groupId>
+				<artifactId>maven-s3-wagon</artifactId>
+				<version>1.2.1</version>
+			</extension>
+		</extensions>
+	</build>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -67,13 +76,6 @@
 			<comments>A business-friendly OSS license</comments>
 		</license>
 	</licenses>
-	<repositories>
-		<repository>
-			<id>jalia-repo</id>
-			<name>Jalia Repository</name>
-			<url>http://repo.danysoft.org.s3.amazonaws.com/release/</url>
-		</repository>
-	</repositories>
 	<distributionManagement>
 		<site>
 			<id>repo.danysoft.org</id>
