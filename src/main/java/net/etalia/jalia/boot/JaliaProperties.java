@@ -25,6 +25,12 @@ public class JaliaProperties {
 
     private boolean unrollObjects;
 
+    @Value("true")
+    private boolean withPathRequestBody;
+
+    @Value("true")
+    private boolean installConverter;
+
     public String getFieldsParameter() {
         return fieldsParameter;
     }
@@ -79,5 +85,21 @@ public class JaliaProperties {
 
     public void setGroupsResource(String groupsResource) {
         this.groupsResource = groupsResource;
+    }
+
+    public void setWithPathRequestBody(boolean withPathRequestBody) {
+        this.withPathRequestBody = withPathRequestBody;
+    }
+
+    public boolean isWithPathRequestBody() {
+        return withPathRequestBody;
+    }
+
+    public void setInstallConverter(boolean installConverter) {
+        this.installConverter = installConverter;
+    }
+
+    public boolean isInstallConverter() {
+        return installConverter;
     }
 }

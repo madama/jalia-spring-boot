@@ -15,12 +15,15 @@ import java.util.Set;
  */
 public class JpaNameProvider implements EntityNameProvider {
 
-    private final EntityManager entityManager;
+    private EntityManager entityManager;
 
     private final Map<String, Class<?>> namesToClass = new HashMap<String, Class<?>>();
     private final Map<Class<?>, String> classToNames = new HashMap<Class<?>, String>();
 
-    public JpaNameProvider(EntityManager entityManager) {
+    public JpaNameProvider() {
+    }
+
+    public void setEntityManager(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
@@ -57,7 +60,7 @@ public class JpaNameProvider implements EntityNameProvider {
 
     /**
      * Handly hook to setup some class->names bindings in a non standard way. This is called as first
-     * thing by {@link #setup()} and classes already registered will be ignored.
+     * thing by {@link #scanEntities()} and classes already registered by this methos will be ignored there.
      */
     protected void doCustomSetup() {
         // Enpty

@@ -1,12 +1,10 @@
 package net.etalia.jalia.boot;
 
 import net.etalia.jalia.*;
-import net.etalia.jalia.spring.JaliaHttpMessageConverter;
 import net.etalia.jalia.spring.JaliaParametersFilter;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -83,16 +81,11 @@ public class AutoConfiguration {
     @ConditionalOnBean(EntityManagerFactory.class)
     @ConditionalOnMissingBean(EntityFactory.class)
     @Bean
-    public EntityFactory jpaEntityFactory(EntityManager entityManager) {
+    public JpaEntityFactory jpaEntityFactory(EntityManager entityManager) {
         LOG.info("Creating JPA Jalia Entity Factory");
-        return new JpaEntityFactory(entityManager);
-    }
-
-    @ConditionalOnMissingBean({EntityFactory.class, EntityManagerFactory.class})
-    @Bean
-    public EntityFactory basicEntityFactory(EntityManager manager) {
-        LOG.info("Creating BOGUS Jalia Entity Factory with entity manager " + manager);
-        return new JpaEntityFactory(null);
+        JpaEntityFactory jpaEntityFactory = new JpaEntityFactory();
+        jpaEntityFactory.setEntityManager(entityManager);
+        return jpaEntityFactory;
     }
 
 
@@ -101,7 +94,9 @@ public class AutoConfiguration {
     @Bean
     public EntityNameProvider jpaNameProvider(EntityManager entityManager) {
         LOG.info("Creating JPA Jalia Name Provider");
-        return new JpaNameProvider(entityManager);
+        JpaNameProvider jpaNameProvider = new JpaNameProvider();
+        jpaNameProvider.setEntityManager(entityManager);
+        return jpaNameProvider;
     }
 
     @ConditionalOnMissingBean(ObjectMapper.class)
@@ -115,16 +110,6 @@ public class AutoConfiguration {
         return mapper;
     }
 
-    @ConditionalOnMissingBean(JaliaHttpMessageConverter.class)
-    @ConditionalOnBean(ObjectMapper.class)
-    @Bean
-    public JaliaHttpMessageConverter jaliaHttpMessageConverter(ObjectMapper mapper) {
-        LOG.info("Installing Jalia message converter");
-        JaliaHttpMessageConverter converter = new JaliaHttpMessageConverter();
-        converter.setObjectMapper(mapper);
-        return converter;
-    }
-
     private void setupMapper(JaliaProperties properties, EntityFactory entityfactory, EntityNameProvider nameProvider, JsonClassDataFactory classDataFactory, ObjectMapper mapper) {
         mapper.setEntityNameProvider(nameProvider);
         mapper.setEntityFactory(entityfactory);
@@ -134,5 +119,4 @@ public class AutoConfiguration {
         mapper.setOption(DefaultOptions.PRETTY_PRINT, properties.isPrettyPrint());
         mapper.setOption(DefaultOptions.UNROLL_OBJECTS, properties.isUnrollObjects());
     }
-
 }
