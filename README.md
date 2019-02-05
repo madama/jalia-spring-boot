@@ -4,6 +4,6 @@
 Jalia Spring Boot starter
 =========================
 
-Automatically serups Jalia ina Spring Boot application, using existing JPA infrastructure if present.
+Automatically sets up Jalia in a Spring Boot application, using existing JPA infrastructure if present.
 
 

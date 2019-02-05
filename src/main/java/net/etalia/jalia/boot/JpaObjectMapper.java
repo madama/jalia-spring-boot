@@ -1,8 +1,6 @@
 package net.etalia.jalia.boot;
 
-import net.etalia.jalia.JsonContext;
-import net.etalia.jalia.ObjectMapper;
-import net.etalia.jalia.TypeUtil;
+import net.etalia.jalia.*;
 import net.etalia.jalia.stream.JsonReader;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestAttributes;
@@ -26,6 +24,10 @@ public class JpaObjectMapper extends ObjectMapper {
                 if (id != null) {
                     Class<?> clazz = (Class<?>) RequestContextHolder.getRequestAttributes().getAttribute(REQUEST_ID_CLASS, RequestAttributes.SCOPE_REQUEST);
                     pre = getEntityFactory().buildEntity(clazz, id, ctx);
+                    if (pre == null) {
+                        throw new JaliaException("Cannot find entity of type " + clazz + " with id " + id + " from path");
+                    }
+                    ctx.putLocalStack(BeanJsonDeSer.ALLOW_NEW, false);
                     RequestContextHolder.getRequestAttributes().removeAttribute(REQUEST_ID, RequestAttributes.SCOPE_REQUEST);
                     RequestContextHolder.getRequestAttributes().removeAttribute(REQUEST_ID_CLASS, RequestAttributes.SCOPE_REQUEST);
                 }
