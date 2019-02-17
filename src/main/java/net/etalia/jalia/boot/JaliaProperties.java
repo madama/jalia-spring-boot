@@ -31,6 +31,9 @@ public class JaliaProperties {
     @Value("true")
     private boolean installConverter;
 
+    @Value("true")
+    private boolean installCodec;
+
     public String getFieldsParameter() {
         return fieldsParameter;
     }
@@ -101,5 +104,13 @@ public class JaliaProperties {
 
     public boolean isInstallConverter() {
         return installConverter;
+    }
+
+    public void setInstallCodec(boolean installCodec) {
+        this.installCodec = installCodec;
+    }
+
+    public boolean isInstallCodec() {
+        return installCodec;
     }
 }
