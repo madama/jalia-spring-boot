@@ -46,6 +46,8 @@ public class JaliaCodecsAutoConfiguration {
                     useMapper = new ObjectMapper();
                     useMapper.setEntityNameProvider(objectMapper.getEntityNameProvider());
                     useMapper.setOption(DefaultOptions.ALWAYS_SERIALIZE_ON_DEMAND_ONLY, true);
+                    useMapper.setOption(DefaultOptions.ALWAYS_ALLOW_NEW_INSTANCES, true);
+                    useMapper.setOption(DefaultOptions.ALWAYS_ALLOW_ENTITY_PROPERTY_CHANGES, true);
                     fields = OutField.getRoot("*");
                 }
                 CodecConfigurer.DefaultCodecs defaults = configurer.defaultCodecs();
