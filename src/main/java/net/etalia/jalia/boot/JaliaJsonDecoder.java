@@ -5,7 +5,7 @@ import java.util.Map;
 import net.etalia.jalia.JaliaException;
 import net.etalia.jalia.ObjectMapper;
 import net.etalia.jalia.TypeUtil;
-import org.springframework.core.MethodParameter;
+import org.reactivestreams.Publisher;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
@@ -36,42 +36,41 @@ public class JaliaJsonDecoder extends JaliaCodecSupport implements HttpMessageDe
     }
 
     @Override
-    public Mono<Object> decodeToMono(org.reactivestreams.Publisher<DataBuffer> inputStream,
-            ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
-        return decode(inputStream, elementType, mimeType, hints).singleOrEmpty();
+    public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType, MimeType mimeType,
+            Map<String, Object> hints) {
+        return internalDecode(inputStream, hints, TypeUtil.get(elementType.getType())).singleOrEmpty();
     }
 
     @Override
-    public Flux<Object> decode(org.reactivestreams.Publisher<DataBuffer> inputStream,
-            ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+    public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType, MimeType mimeType,
+            Map<String, Object> hints) {
+        return internalDecode(inputStream, hints, TypeUtil.getList(List.class, elementType.getType()));
+    }
 
-
-        MethodParameter param = getParameter(elementType);
-        Class<?> contextClass = (param != null ? param.getContainingClass() : null);
-
-        //JavaType javaType = getJavaType(elementType.getType(), contextClass);
-        //Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
-
-        return Flux.from(inputStream).map(data -> {
-            try {
-                Object value = objectMapper.readValue(data.asInputStream(), TypeUtil.get(elementType.getType()));
-                if (!Hints.isLoggingSuppressed(hints)) {
-                    LogFormatUtils.traceDebug(logger, traceOn -> {
-                        String formatted = LogFormatUtils.formatValue(value, !traceOn);
-                        return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
-                    });
-                }
-                return value;
+    private Flux<Object> internalDecode(Publisher<DataBuffer> inputStream, Map<String, Object> hints, TypeUtil type) {
+        FluxSequenceInputStream fluxin = new FluxSequenceInputStream();
+        inputStream.subscribe(fluxin);
+        try {
+            Object value = objectMapper.readValue(fluxin, type);
+            if (!Hints.isLoggingSuppressed(hints)) {
+                LogFormatUtils.traceDebug(logger, traceOn -> {
+                    String formatted = LogFormatUtils.formatValue(value, !traceOn);
+                    return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
+                });
             }
-            catch (JaliaException ex) {
-                throw new DecodingException("JSON decoding error: ", ex);
+            if (value instanceof Iterable) {
+                return Flux.fromIterable((Iterable) value);
+            } else {
+                return Flux.just(value);
             }
-        });
+        } catch (JaliaException ex) {
+            throw new DecodingException("JSON decoding error: ", ex);
+        }
     }
 
     @Override
     public List<MimeType> getDecodableMimeTypes() {
-        return this.mimeTypes;
+        return mimeTypes;
     }
 
 }
