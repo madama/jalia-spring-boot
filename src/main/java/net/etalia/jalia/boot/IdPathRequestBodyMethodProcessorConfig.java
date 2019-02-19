@@ -1,26 +1,31 @@
 package net.etalia.jalia.boot;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
+import net.etalia.jalia.spring.JaliaHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-
 @Configuration
 @ConditionalOnBean(RequestMappingHandlerAdapter.class)
+@AutoConfigureAfter({InstallHttpMessageConverter.class, WebMvcAutoConfiguration.class})
 public class IdPathRequestBodyMethodProcessorConfig {
+
+    private final static Logger LOG = Logger.getLogger(IdPathRequestBodyMethodProcessorConfig.class.getName());
 
     @Autowired
     private RequestMappingHandlerAdapter requestMappingHandlerAdapter;
 
     @Autowired
-    private List<HttpMessageConverter<?>> converters;
+    private JaliaHttpMessageConverter converter;
 
     @Autowired
     private JaliaProperties jaliaProperties;
@@ -28,10 +33,14 @@ public class IdPathRequestBodyMethodProcessorConfig {
     @PostConstruct
     public void init() {
         if (!jaliaProperties.isWithPathRequestBody()) {
+            LOG.info("Not installing Jalia @IdPathRequestBody processor");
             return;
         }
 
-        IdPathRequestBodyMethodProcessor processor = new IdPathRequestBodyMethodProcessor(converters);
+        LOG.info("Installing Jalia @IdPathRequestBody processor");
+
+        IdPathRequestBodyMethodProcessor processor = new IdPathRequestBodyMethodProcessor(
+                Collections.singletonList(converter));
         List<HandlerMethodArgumentResolver> mangledResolvers = new ArrayList<>();
         mangledResolvers.add(processor);
         mangledResolvers.addAll(requestMappingHandlerAdapter.getArgumentResolvers());
