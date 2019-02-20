@@ -1,4 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=net.etalia.jalia.boot.AutoConfiguration, \
 	net.etalia.jalia.boot.IdPathRequestBodyMethodProcessorConfig, \
 	net.etalia.jalia.boot.InstallHttpMessageConverter, \
-	net.etalia.jalia.boot.JaliaCodecsAutoConfiguration
+	net.etalia.jalia.boot.JaliaCodecsAutoConfiguration, \
+	net.etalia.jalia.boot.JaliaParametersFilterConfiguration

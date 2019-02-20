@@ -1,14 +1,13 @@
 package net.etalia.jalia.boot;
 
-import net.etalia.jalia.EntityNameProvider;
-
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Type;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import net.etalia.jalia.EntityNameProvider;
 
 /**
  * Entity name provider that scans for JPA repositories to gather entity classes.
@@ -67,7 +66,14 @@ public class JpaNameProvider implements EntityNameProvider {
     }
 
     public String getEntityName(Class<?> clazz) {
-        return classToNames.get(clazz);
+        String name = classToNames.get(clazz);
+        if (name != null) {
+            return name;
+        }
+        if (clazz.getSuperclass() != null) {
+            return getEntityName(clazz.getSuperclass());
+        }
+        return null;
     }
 
     public Class<?> getEntityClass(String name) {
