@@ -1,12 +1,29 @@
 package net.etalia.jalia.boot;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import javax.persistence.EntityManager;
+import javax.persistence.metamodel.EntityType;
 import net.etalia.jalia.EntityFactory;
 import net.etalia.jalia.JsonContext;
 
-import javax.persistence.EntityManager;
-import javax.persistence.metamodel.EntityType;
-
 public class JpaEntityFactory implements EntityFactory {
+
+    private static Class<?> hibernateProxy;
+    private static Method getHibernateLazyInitializer;
+    private static Method getImplementation;
+
+    static {
+        try {
+            hibernateProxy = Class.forName("org.hibernate.proxy.HibernateProxy");
+            getHibernateLazyInitializer = hibernateProxy.getDeclaredMethod("getHibernateLazyInitializer");
+            getImplementation = Class.forName("org.hibernate.proxy.LazyInitializer")
+                    .getDeclaredMethod("getImplementation");
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+            // Hibernate not on the classpath or not right version
+            hibernateProxy = null;
+        }
+    }
 
     private EntityManager entityManager;
 
@@ -59,6 +76,16 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     public Object prepare(Object obj, boolean serializing, JsonContext context) {
+        // Unwrap using hibernate proxy if needed
+        if (hibernateProxy != null && hibernateProxy.isAssignableFrom(obj.getClass())) {
+            Object initializer = null;
+            try {
+                initializer = getHibernateLazyInitializer.invoke(obj);
+                obj = getImplementation.invoke(initializer);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new IllegalStateException("Cannot unwrap hibernate proxy", e);
+            }
+        }
         return obj;
     }
 
