@@ -1,5 +1,6 @@
 package net.etalia.jalia.boot;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +31,12 @@ import reactor.core.publisher.Mono;
 public class JaliaJsonEncoder extends JaliaCodecSupport implements HttpMessageEncoder<Object> {
 
     private static final byte[] NEWLINE_SEPARATOR = {'\n'};
+    private static boolean logJson;
     private final OutField fields;
+
+    public static void setLogJson(boolean logJson) {
+        JaliaJsonEncoder.logJson = logJson;
+    }
 
     public JaliaJsonEncoder(ObjectMapper objectMapper, MimeType[] mimeTypes, OutField fields) {
         super(objectMapper, mimeTypes);
@@ -53,7 +59,7 @@ public class JaliaJsonEncoder extends JaliaCodecSupport implements HttpMessageEn
                     encodeValue(value, mimeType, bufferFactory, elementType, hints, encoding)).flux();
         }
 
-        for (MediaType streamingMediaType : this.getStreamingMediaTypes()) {
+        for (MediaType streamingMediaType : getStreamingMediaTypes()) {
             if (streamingMediaType.isCompatibleWith(mimeType)) {
                 objectMapper.setOption(DefaultOptions.PRETTY_PRINT, false);
                 return Flux.from(inputStream).map(value -> {
@@ -93,7 +99,17 @@ public class JaliaJsonEncoder extends JaliaCodecSupport implements HttpMessageEn
         OutputStream outputStream = buffer.asOutputStream();
 
         try {
-            objectMapper.writeValue(outputStream, fields, value);
+            if (logJson) {
+                String asString = objectMapper.writeValueAsString(value, fields);
+                logger.info(asString);
+                try {
+                    outputStream.write(asString.getBytes(StandardCharsets.UTF_8));
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
+            } else {
+                objectMapper.writeValue(outputStream, fields, value);
+            }
             release = false;
         }
         catch (JaliaException ex) {
@@ -110,7 +126,7 @@ public class JaliaJsonEncoder extends JaliaCodecSupport implements HttpMessageEn
 
     @Override
     public List<MimeType> getEncodableMimeTypes() {
-        return this.mimeTypes;
+        return mimeTypes;
     }
 
     @Override

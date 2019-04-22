@@ -2,6 +2,7 @@ package net.etalia.jalia.boot;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import net.etalia.jalia.JaliaException;
 import net.etalia.jalia.ObjectMapper;
 import net.etalia.jalia.TypeUtil;
@@ -19,6 +20,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class JaliaJsonDecoder extends JaliaCodecSupport implements HttpMessageDecoder<Object> {
+
+    private static boolean logJson;
+
+    public static void setLogJson(boolean logJson) {
+        JaliaJsonDecoder.logJson = logJson;
+    }
 
     public JaliaJsonDecoder(ObjectMapper objectMapper, MimeType[] mimeTypes) {
         super(objectMapper, mimeTypes);
@@ -51,10 +58,20 @@ public class JaliaJsonDecoder extends JaliaCodecSupport implements HttpMessageDe
         FluxSequenceInputStream fluxin = new FluxSequenceInputStream();
         inputStream.subscribe(fluxin);
         try {
-            Object value = objectMapper.readValue(fluxin, type);
+            Object value = null;
+            if (logJson) {
+                Scanner scanner = new Scanner(fluxin, "UTF-8");
+                String json = scanner.useDelimiter("\\A").next();
+                logger.info(json);
+                scanner.close();
+                value = objectMapper.readValue(json, type);
+            } else {
+                value = objectMapper.readValue(fluxin, type);
+            }
             if (!Hints.isLoggingSuppressed(hints)) {
+                Object logValue = value;
                 LogFormatUtils.traceDebug(logger, traceOn -> {
-                    String formatted = LogFormatUtils.formatValue(value, !traceOn);
+                    String formatted = LogFormatUtils.formatValue(logValue, !traceOn);
                     return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
                 });
             }
