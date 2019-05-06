@@ -40,6 +40,7 @@ public class JaliaParametersFilterConfiguration {
             } catch (FileNotFoundException e) {
                 LOG.log(Level.WARNING, "No Jalia groups found for '" + properties.getGroupsResource() + "'");
             }
+            OutField.cleanGroups();
             for (Resource resource : resources) {
                 LOG.fine("Reading groups from " + resource.getURI());
                 try (InputStream resin = resource.getInputStream()) {
