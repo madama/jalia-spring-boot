@@ -38,6 +38,14 @@ public class FluxSequenceInputStream extends InputStream implements Subscriber<D
     @Override
     public void onComplete() {
         done = true;
+        unsubscribe();
+    }
+
+    public void unsubscribe() {
+        if (subscription != null) {
+            subscription.cancel();
+            subscription = null;
+        }
     }
 
     void nextStream() throws IOException {

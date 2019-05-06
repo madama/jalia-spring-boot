@@ -56,8 +56,8 @@ public class JaliaJsonDecoder extends JaliaCodecSupport implements HttpMessageDe
 
     private Flux<Object> internalDecode(Publisher<DataBuffer> inputStream, Map<String, Object> hints, TypeUtil type) {
         FluxSequenceInputStream fluxin = new FluxSequenceInputStream();
-        inputStream.subscribe(fluxin);
         try {
+            inputStream.subscribe(fluxin);
             Object value = null;
             if (logJson) {
                 Scanner scanner = new Scanner(fluxin, "UTF-8");
@@ -82,6 +82,8 @@ public class JaliaJsonDecoder extends JaliaCodecSupport implements HttpMessageDe
             }
         } catch (JaliaException ex) {
             throw new DecodingException("JSON decoding error: ", ex);
+        } finally {
+            fluxin.unsubscribe();
         }
     }
 
