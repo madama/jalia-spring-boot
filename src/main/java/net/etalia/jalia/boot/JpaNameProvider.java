@@ -15,6 +15,7 @@ import net.etalia.jalia.EntityNameProvider;
 public class JpaNameProvider implements EntityNameProvider {
 
     private EntityManager entityManager;
+    private Map<String, String> packagePrefixes = new HashMap<>();
 
     private final Map<String, Class<?>> namesToClass = new HashMap<String, Class<?>>();
     private final Map<Class<?>, String> classToNames = new HashMap<Class<?>, String>();
@@ -24,6 +25,14 @@ public class JpaNameProvider implements EntityNameProvider {
 
     public void setEntityManager(EntityManager entityManager) {
         this.entityManager = entityManager;
+    }
+
+    public void setPackagePrefixes(Map<String, String> packagePrefixes) {
+        this.packagePrefixes = packagePrefixes;
+    }
+
+    public void addPackagePrefix(String packageName, String prefix) {
+        packagePrefixes.put(packageName, prefix);
     }
 
     @PostConstruct
@@ -39,7 +48,24 @@ public class JpaNameProvider implements EntityNameProvider {
             if (classToNames.containsKey(javaType)) {
                 continue;
             }
-            register(javaType.getSimpleName(), javaType);
+            String packageName = javaType.getPackage().getName();
+            int packageLength = Integer.MAX_VALUE;
+            String prefix = null;
+            for (Map.Entry<String, String> entry : packagePrefixes.entrySet()) {
+                String key = entry.getKey();
+                if (packageName.startsWith(key) && packageLength > key.length()) {
+                    prefix = entry.getValue();
+                    if (prefix.length() > 1) {
+                        prefix += ".";
+                    }
+                    packageLength = key.length();
+                }
+            }
+            if (prefix != null) {
+                register(prefix + javaType.getName().substring(packageLength + 1), javaType);
+            } else {
+                register(javaType.getSimpleName(), javaType);
+            }
         }
     }
 
