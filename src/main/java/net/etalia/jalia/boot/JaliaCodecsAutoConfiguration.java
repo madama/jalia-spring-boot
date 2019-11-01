@@ -1,6 +1,8 @@
 package net.etalia.jalia.boot;
 
 import net.etalia.jalia.DefaultOptions;
+import net.etalia.jalia.EntityFactory;
+import net.etalia.jalia.JsonContext;
 import net.etalia.jalia.ObjectMapper;
 import net.etalia.jalia.OutField;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,7 @@ public class JaliaCodecsAutoConfiguration {
                 if (configurer instanceof DefaultClientCodecConfigurer) {
                     useMapper = new ObjectMapper();
                     useMapper.setEntityNameProvider(objectMapper.getEntityNameProvider());
+                    useMapper.setEntityFactory(new IdOnlyFactoryWrapper(objectMapper.getEntityFactory()));
                     useMapper.setOption(DefaultOptions.ALWAYS_SERIALIZE_ON_DEMAND_ONLY, true);
                     useMapper.setOption(DefaultOptions.ALWAYS_ALLOW_NEW_INSTANCES, true);
                     useMapper.setOption(DefaultOptions.ALWAYS_ALLOW_ENTITY_PROPERTY_CHANGES, true);
@@ -61,5 +64,33 @@ public class JaliaCodecsAutoConfiguration {
             };
         }
 
+        private static class IdOnlyFactoryWrapper implements EntityFactory {
+
+            private final EntityFactory delegate;
+
+            public IdOnlyFactoryWrapper(EntityFactory delegate) {
+                this.delegate = delegate;
+            }
+
+            @Override
+            public Object getId(Object entity, JsonContext context) {
+                return delegate.getId(entity, context);
+            }
+
+            @Override
+            public Object buildEntity(Class<?> clazz, Object id, JsonContext context) {
+                return null;
+            }
+
+            @Override
+            public Object prepare(Object obj, boolean serializing, JsonContext context) {
+                return obj;
+            }
+
+            @Override
+            public Object finish(Object obj, boolean serializing, JsonContext context) {
+                return obj;
+            }
+        }
     }
 }
