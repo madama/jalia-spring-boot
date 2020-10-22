@@ -14,7 +14,7 @@ public class JaliaProperties {
     @Value("group")
     private String groupParameter;
 
-    @Value("classpath:/jalia/group*.json")
+    @Value("classpath:/jalia/group*")
     private String groupsResource;
 
     private boolean includeNulls;
