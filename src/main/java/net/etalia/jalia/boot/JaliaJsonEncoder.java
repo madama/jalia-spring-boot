@@ -83,6 +83,12 @@ public class JaliaJsonEncoder extends JaliaCodecSupport implements HttpMessageEn
         return charset;
     }
 
+    @Override
+    public DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory, ResolvableType valueType, MimeType mimeType,
+            Map<String, Object> hints) {
+        Charset encoding = getJsonEncoding(mimeType);
+        return encodeValue(value, mimeType, bufferFactory, valueType, hints, encoding);
+    }
 
     private DataBuffer encodeValue(Object value, @Nullable MimeType mimeType, DataBufferFactory bufferFactory,
             ResolvableType elementType, @Nullable Map<String, Object> hints, Charset encoding) {
